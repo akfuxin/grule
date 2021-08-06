@@ -38,13 +38,6 @@
             this.getCurrentUser();
             ws({path: '/mnt/ws'})
         },
-        watch: {
-            user: (v) => {
-                if (v == null) {
-                    location.reload()
-                }
-            }
-        },
         methods: {
             getCurrentUser() {
                 $.ajax({
@@ -54,7 +47,7 @@
                         if (res.code === '00') {
                             this.user = res.data;
                             if (this.user.permissions == undefined || this.user.permissions == null) this.user.permissions = []
-                        } else this.$Notice.error(res.desc)
+                        } else this.$Message.error(res.desc)
                     }
                 })
             }

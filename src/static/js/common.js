@@ -114,7 +114,7 @@ function loadJs() {
 }
 
 
-// ================定义组件=====================
+// ================定义公用组件=====================
 // 时间戳格式化组件
 Vue.component('date-item', (resolve, reject) => {
     loadJs('moment', () => {
@@ -277,32 +277,32 @@ Vue.component('ace-groovy', (resolve, reject) => {
 
 // 异步加载组件
 new Map([
-    ['Upload', 'Upload.vue'],
-    ['Admin', 'Admin.vue'],
-    ['Login', 'Login.vue'],
-    ['Dashboard', 'Dashboard.vue'],
-    ['PolicyCenter', 'config/PolicyCenter.vue'],
-    ['DecisionConfig', 'config/DecisionConfig.vue'],
-    ['DecisionDetail', 'config/DecisionDetail.vue'],
-    ['PolicyDetail', 'config/PolicyDetail.vue'],
-    ['RuleDetail', 'config/RuleDetail.vue'],
-    ['FieldConfig', 'config/FieldConfig.vue'],
-    ['DataCollectorConfig', 'config/DataCollectorConfig.vue'],
-    ['OpHistory', 'config/OpHistory.vue'],
-    ['UserCenter', 'config/UserCenter.vue'],
-    ['UserConfig', 'config/UserConfig.vue'],
-    ['Permission', 'config/Permission.vue'],
-    ['DecisionData', 'data/DecisionData.vue'],
-    ['DecisionResult', 'data/DecideResult.vue'],
-    ['CollectResult', 'data/CollectResult.vue'],
-    ['DataAnalyse', 'data/DataAnalyse.vue'],
-    ['DecisionEChart', 'data/DecisionEChart.vue'],
-    ['RuleEChart', 'data/RuleEChart.vue'],
-    ['Clock', 'Clock.vue'],
-    ['StatusSuspension', 'StatusSuspension.vue'],
-    ['MyInfo', 'MyInfo.vue'],
-]).forEach((value, key) => {
+    ['Upload', 'components/Upload.vue'],
+    ['Admin', 'views/Admin.vue'],
+    ['Login', 'views/Login.vue'],
+    ['Dashboard', 'views/Dashboard.vue'],
+    ['PolicyCenter', 'views/config/PolicyCenter.vue'],
+    ['DecisionConfig', 'views/config/DecisionConfig.vue'],
+    ['DecisionDetail', 'views/config/DecisionDetail.vue'],
+    ['PolicyDetail', 'views/config/PolicyDetail.vue'],
+    ['RuleDetail', 'views/config/RuleDetail.vue'],
+    ['FieldConfig', 'views/config/FieldConfig.vue'],
+    ['DataCollectorConfig', 'views/config/DataCollectorConfig.vue'],
+    ['OpHistory', 'views/config/OpHistory.vue'],
+    ['UserCenter', 'views/config/UserCenter.vue'],
+    ['UserConfig', 'views/config/UserConfig.vue'],
+    ['Permission', 'views/config/Permission.vue'],
+    ['DecisionData', 'views/data/DecisionData.vue'],
+    ['DecisionResult', 'views/data/DecideResult.vue'],
+    ['CollectResult', 'views/data/CollectResult.vue'],
+    ['DataAnalyse', 'views/data/DataAnalyse.vue'],
+    ['DecisionEChart', 'views/data/DecisionEChart.vue'],
+    ['RuleEChart', 'views/data/RuleEChart.vue'],
+    ['Clock', 'views/Clock.vue'],
+    ['StatusSuspension', 'views/StatusSuspension.vue'],
+    ['MyInfo', 'views/MyInfo.vue'],
+]).forEach((path, key) => {
     Vue.component(key, (resolve, reject) => {
-        httpVueLoader('components/'+ value)().then((r) => resolve(r))
+        httpVueLoader(path)().then((r) => resolve(r))
     });
 });

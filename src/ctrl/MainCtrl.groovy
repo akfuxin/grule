@@ -133,14 +133,13 @@ class MainCtrl extends ServerTpl {
         Utils.baseDir("static/js/lib/$fName")
     }
 
-    @Path(path = 'components/:fName')
-    File components(String fName, HttpContext hCtx) {
-        if (app().profile == 'pro') {
-            hCtx.response.cacheControl(1800)
-        }
+
+    @Path(path = 'views/:fName')
+    File views(String fName, HttpContext hCtx) {
+        if (app().profile == 'pro') hCtx.response.cacheControl(1800)
         def permission = auth_page.get(fName)
         if (permission) hCtx.auth(permission)
-        Utils.baseDir("static/components/$fName")
+        Utils.baseDir("static/views/$fName")
     }
 
 
@@ -148,9 +147,7 @@ class MainCtrl extends ServerTpl {
 
     @Path(path = 'css/:fName')
     File css(String fName, HttpContext hCtx) {
-        if (app().profile == 'pro') {
-            hCtx.response.cacheControl(1800)
-        }
+        if (app().profile == 'pro') hCtx.response.cacheControl(1800)
         Utils.baseDir("static/css/$fName")
     }
     @Path(path = 'css/fonts/:fName')
