@@ -114,10 +114,10 @@
                           <ace-groovy v-model="model.parseScript" style="height: 190px; width: 670px"></ace-groovy>
                         </h-formitem>
                         <h-formitem v-show="model.type == 'script'" label="值计算脚本" icon="h-icon-complete" prop="computeScript" single>
-                          <ace-groovy v-model="model.computeScript" style="height: 300px; width: 670px"></ace-groovy>
+                          <ace-groovy v-model="model.computeScript" style="height: 300px; width: 670px" :placeholder='"// Groovy脚本"'></ace-groovy>
                         </h-formitem>
                         <h-formitem v-show="model.type == 'sql'" label="sql执行脚本" icon="h-icon-complete" prop="sqlScript" single>
-                          <ace-groovy v-model="model.sqlScript" style="height: 250px; width: 670px"></ace-groovy>
+                          <ace-groovy v-model="model.sqlScript" style="height: 250px; width: 670px" :placeholder='sqlScriptPlaceholder'></ace-groovy>
                         </h-formitem>
                         <h-formitem single>
                                 <h-button v-if="model.id" color="primary" :loading="isLoading" @click="update">提交</h-button>
@@ -129,11 +129,12 @@
         props: ['collector'],
         data() {
             return {
+                sqlScriptPlaceholder: `// Groovy脚本. 默认数据底操作变量DB(Groovy SQL实例)\nDB.firstRow('select * from test')['id']`,
                 isLoading: false,
                 model: this.collector ? $.extend({sqlScript: '', computeScript: '', parseScript: '', dataSuccessScript: ''}, this.collector): {
                     type: 'http', method: 'GET', timeout: 10000, minIdle: 0, maxActive: 5, recordResult: true, dataSuccessScript:
 `{resultStr, respCode -> // 接口返回的字符串, 接口http响应码(如果是缓存则为空)
-    return (respCode == null || respCode == 200) && resultStr
+    return (respCode == null || respCode == 200) && resultStr != null
 }`, parseScript: `{resultStr, respCode -> // 接口返回的字符串, 接口http响应码(如果是缓存则为空)
     return resultStr
 }`

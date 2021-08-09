@@ -139,7 +139,7 @@ Vue.component('ace-json', (resolve, reject) => {
         loadJs('ace-tools', 'ace-lang-json', () => {
             resolve({
                 model: {prop: 'content', event: 'update'},
-                props: {content: String, readonly: Boolean},
+                props: {content: String, readonly: Boolean, placeholder: String},
                 template: '<div ref="editor" style="height: 200px; width: 99%"></div>',
                 data() {
                     return {
@@ -165,7 +165,8 @@ Vue.component('ace-json', (resolve, reject) => {
                         this.editor.setOptions({
                             enableBasicAutocompletion: true,
                             enableSnippets: true,
-                            enableLiveAutocompletion: true
+                            enableLiveAutocompletion: true,
+                            placeholder: this.placeholder || '',
                         });
                         this.editor.on('change', (e) => {
                             // this.content = this.editor.session.getValue();
@@ -196,7 +197,7 @@ Vue.component('ace-groovy', (resolve, reject) => {
         loadJs('ace-tools', 'ace-lang-groovy', 'ace-snip-groovy', () => {
             resolve({
                 model: {prop: 'content', event: 'update'},
-                props: {content: String, readonly: Boolean},
+                props: {content: String, readonly: Boolean, placeholder: String},
                 template: '<div ref="editor" style="height: 250px; width: 99%"></div>',
                 data() {
                     return {
@@ -225,7 +226,8 @@ Vue.component('ace-groovy', (resolve, reject) => {
                         this.editor.setOptions({
                             enableBasicAutocompletion: true,
                             enableSnippets: true,
-                            enableLiveAutocompletion: true
+                            enableLiveAutocompletion: true,
+                            placeholder: this.placeholder || '',
                         });
                         this.editor.on('change', (e) => {
                             // this.content = this.editor.session.getValue();

@@ -331,7 +331,7 @@ jdk8, gradle6.8+, mysql5.7+/MariaDB10.2+
 CREATE DATABASE IF NOT EXISTS rule DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 ```
 ```properties
-# jdbcUrl
+# jdbcUrl. 替换 conf/app.properties 中的 jpa_rule.url 配置项
 jpa_rule.url=jdbc:mysql://localhost:3306/rule?useSSL=false&user=root&password=root&useUnicode=true&characterEncoding=utf-8
 ```
 
@@ -339,16 +339,17 @@ jpa_rule.url=jdbc:mysql://localhost:3306/rule?useSSL=false&user=root&password=ro
 
 1. IntelliJ IDEA 运行 main.groovy
 2. 
- * linux: nohup sh start.sh -Xmx512m -Xms512m > /dev/null 2>&1 &
+ * linux: sh start.sh -Xmx512m -Xms512m
  * windows: ./start
 
 # v1.2.5 ing...
 - [x] pref: 指标名字符限制: 字母,中文开头,可包含字数,字母,下划线,中文
-- [x] feat: app:1.0.6
+- [x] feat: app 1.0.6
 - [x] pref: static components -> view
+- [x] style: ace-groovy placeholder
 - [ ] feat: rule swagger api
-- [ ] style: ace-groovy placeholder
 - [ ] feat: redis 收集器
+- [ ] pref: 首页 loading
 
 
 # 参与贡献

@@ -128,7 +128,7 @@
                                         <input type="text" v-model="data.regex" />
                                     </h-formitem>
                                     <h-formitem v-if="data.type == 'Str'" label="验证函数">
-                                        <ace-groovy v-model="data.validFun" style="height: 80px"></ace-groovy>
+                                        <ace-groovy v-model="data.validFun" style="height: 80px" :placeholder='"// Groovy脚本"'></ace-groovy>
                                     </h-formitem>
 
                                     <h-formitem v-if="data.type == 'Int'" label="最小值">

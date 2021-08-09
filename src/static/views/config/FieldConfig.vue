@@ -21,7 +21,7 @@
                 <h-tableitem title="更新时间" align="center">
                     <template slot-scope="{data}"><date-item :time="data.updateTime" /></template>
                 </h-tableitem>
-                <!--                    <h-tableitem title="创建时间" prop="createTime" align="center"></h-tableitem>-->
+                <!-- <h-tableitem title="创建时间" prop="createTime" align="center"></h-tableitem> -->
                 <h-tableitem title="收集器" align="center">
                     <template slot-scope="{data}">
                         <div v-if="data.collectorOptions" v-for="opt in data.collectorOptions" :key="opt.collectorId">
@@ -79,7 +79,7 @@
 <!--                            <h-autocomplete v-model="model.dataCollector" :show="model.dataCollectorName" :option="param"></h-autocomplete>-->
                             <div v-for="(opt, index) in model.collectorOptions" :key="opt">
                                 <h-autocomplete v-model="opt.collectorId" :show="opt.collectorName" :option="opt.ac"></h-autocomplete>
-                                <ace-groovy v-model="opt.chooseFn" style="height: 70px"></ace-groovy>
+                                <ace-groovy v-model="opt.chooseFn" style="height: 70px" :placeholder='"// Groovy脚本. 返回true代表选择当前收集器"'></ace-groovy>
                                 <i v-if="model.collectorOptions.length == (index + 1)" class="h-icon-plus" @click="addCollectorOpt"></i>
                                 <i class="h-icon-minus" @click="delCollectorOpt(opt)"></i>
                             </div>
