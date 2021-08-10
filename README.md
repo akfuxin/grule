@@ -324,23 +324,31 @@ end split
 ![Image text](https://gitee.com/xnat/tmp/raw/master/img/userchange.png)
 
 # 使用说明
-jdk8, gradle6.8+, mysql5.7+/MariaDB10.2+
+> 系统基于java轻量级框架: [APP](https://gitee.com/xnat/app)
+1. git clone https://gitee.com/xnat/grule.git
+2.
+  >+ linux: sh start.sh -Xmx512m -Xms512m
+  >+ windows: ./start -Xmx512m -Xms512m
+
+### 环境要求
+jdk8, gradle7+
+
+### 可以更换自已的数据库 (默认用的h2)
+> 数据库要求: mysql5.7+, MariaDB10.2+
 
 ```sql
 -- 创建数据库
 CREATE DATABASE IF NOT EXISTS rule DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 ```
 ```properties
-# jdbcUrl. 替换 conf/app.properties 中的 jpa_rule.url 配置项
+# 替换 conf/app.properties 中的 jpa_rule.url 配置项
 jpa_rule.url=jdbc:mysql://localhost:3306/rule?useSSL=false&user=root&password=root&useUnicode=true&characterEncoding=utf-8
 ```
 
-> 系统基于java轻量级框架: [APP](https://gitee.com/xnat/app)
+### 开发环境运行
+> 需要添加Groovy sdk 3.0.8
 
-1. IntelliJ IDEA 运行 main.groovy
-2. 
- * linux: sh start.sh -Xmx512m -Xms512m
- * windows: ./start
+IntelliJ IDEA 运行 main.groovy 启动
 
 # v1.2.5 ing...
 - [x] pref: 指标名字符限制: 字母,中文开头,可包含字数,字母,下划线,中文
