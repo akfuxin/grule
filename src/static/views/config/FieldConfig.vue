@@ -190,7 +190,10 @@
                                 this.$emit('reload');
                             } else this.$Message.error(res.desc)
                         },
-                        error: () => this.isLoading = false
+                        error: (xhr) => {
+                            this.isLoading = false
+                            this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
+                        }
                     })
                 },
                 add() {
@@ -219,7 +222,10 @@
                                 this.$emit('reload');
                             } else this.$Message.error(res.desc)
                         },
-                        error: () => this.isLoading = false
+                        error: (xhr) => {
+                            this.isLoading = false
+                            this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
+                        }
                     })
                 },
             }
@@ -362,7 +368,10 @@
                             this.list = res.data.list;
                         } else this.$Message.error(res.desc)
                     },
-                    error: () => this.loading = false
+                    error: (xhr) => {
+                        this.loading = false
+                        this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
+                    }
                 })
             }
         }

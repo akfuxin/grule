@@ -11,8 +11,7 @@
                 <input type="password" v-model="data.newpassword2" @keyup.enter="submit"/>
             </h-formitem>
             <h-formitem>
-                <h-button color="primary" :loading="isLoading" @click="submit">提交</h-button>&nbsp;&nbsp;&nbsp;
-                <h-button >取消</h-button>
+                <h-button color="primary" :loading="isLoading" @click="submit">提交</h-button>
             </h-formitem>
         </h-form>
     </div>
@@ -52,15 +51,15 @@
                     type: 'post',
                     data: {id: app.$data.user.id, newPassword: md5(this.data.newpassword2), oldPassword: md5(this.data.oldpassword)},
                     success: (res) => {
+                        this.isLoading = false;
                         if (res.code === '00') {
                             this.$Message.success(`更新密码成功`);
                             this.data = {};
-                            this.isLoading = false;
                         } else this.$Message.error(res.desc)
                     },
-                    error: (xhr, status) => {
+                    error: (xhr) => {
                         this.isLoading = false
-                        this.$Message.error(`${status} : ${xhr.responseText}`)
+                        this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
                     }
                 })
             }

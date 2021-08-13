@@ -91,9 +91,12 @@
                             this.$emit('close');
                             this.$Message.success(`更新: ${this.model.cnName} 成功`);
                             $.extend(this.permission, this.model);
-                        } else this.$Notice.error(res.desc)
+                        } else this.$Message.error(res.desc)
                     },
-                    error: () => this.isLoading = false
+                    error: (xhr) => {
+                        this.isLoading = false
+                        this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
+                    }
                 })
             },
             add() {
@@ -108,9 +111,12 @@
                             this.$emit('close');
                             this.$Message.success(`添加: ${this.model.cnName} 成功`);
                             this.$emit('reload');
-                        } else this.$Notice.error(res.desc)
+                        } else this.$Message.error(res.desc)
                     },
-                    error: () => this.isLoading = false
+                    error: (xhr) => {
+                        this.isLoading = false
+                        this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
+                    }
                 })
             },
         }
@@ -189,9 +195,12 @@
                             this.pageSize = res.data.pageSize;
                             this.totalRow = res.data.totalRow;
                             this.list = res.data.list;
-                        } else this.$Notice.error(res.desc)
+                        } else this.$Message.error(res.desc)
                     },
-                    error: () => this.loading = false
+                    error: (xhr) => {
+                        this.loading = false
+                        this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
+                    }
                 })
             }
         }

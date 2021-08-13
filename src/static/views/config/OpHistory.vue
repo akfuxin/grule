@@ -87,9 +87,12 @@
                             this.totalRow = res.data.totalRow;
                             res.data.list.forEach((item, index) => item._isLimitHeight = true);
                             this.list = res.data.list;
-                        } else this.$Notice.error(res.desc)
+                        } else this.$Message.error(res.desc)
                     },
-                    error: () => this.loading = false
+                    error: (xhr) => {
+                        this.loading = false
+                        this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
+                    }
                 })
             }
         }

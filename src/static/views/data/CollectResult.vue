@@ -226,7 +226,10 @@
                             this.list = res.data.list;
                         } else this.$Notice.error(res.desc)
                     },
-                    error: () => this.loading = false
+                    error: (xhr) => {
+                        this.loading = false
+                        this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
+                    }
                 })
             }
         }

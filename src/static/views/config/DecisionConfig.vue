@@ -450,7 +450,10 @@
                             this.decision = res.data;
                         } else this.$Notice.error(res.desc)
                     },
-                    error: () => this.decisionLoading = false,
+                    error: (xhr) => {
+                        this.decisionLoading = false
+                        this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
+                    }
                 });
                 this.tabs.showId = null;
             }
