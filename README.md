@@ -355,9 +355,9 @@ IntelliJ IDEA 运行 main.groovy 启动
 - [x] feat: app 1.0.6
 - [x] pref: static components -> view
 - [x] style: ace-groovy placeholder
+- [x] style: 首页 loading
 - [ ] feat: rule swagger api
 - [ ] feat: redis 收集器
-- [ ] pref: 首页 loading
 
 
 # 参与贡献

@@ -18,7 +18,8 @@
 </head>
 <body>
 <div id="app">
-    <Admin v-if="user"></Admin>
+    <h-loading v-if="loading" :loading="true"></h-loading>
+    <Admin v-else-if="user"></Admin>
     <Login v-else></Login>
 </div>
 </body>
@@ -29,6 +30,7 @@
     let app = new Vue({
         el: '#app',
         data: {
+            loading: true,
             // 当前登录用户信息
             user: null,
             // 用于各个组件临时数据传递
@@ -40,14 +42,21 @@
         },
         methods: {
             getCurrentUser() {
+                this.loading = true;
                 $.ajax({
                     url: 'getCurrentUser',
-                    // async: false,
                     success: (res) => {
+                        this.loading = false;
                         if (res.code === '00') {
                             this.user = res.data;
-                            if (this.user.permissions == undefined || this.user.permissions == null) this.user.permissions = []
+                            if (this.user.permissions === undefined || this.user.permissions == null) this.user.permissions = []
                         } else this.$Message.error(res.desc)
+                    },
+                    error: (xhr) => {
+                        this.loading = false
+                        if (xhr.status !== 401) {
+                            this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
+                        }
                     }
                 })
             }
