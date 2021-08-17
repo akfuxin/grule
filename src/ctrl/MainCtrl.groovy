@@ -114,9 +114,8 @@ class MainCtrl extends ServerTpl {
     @Path(path = 'api-doc/:fName')
     File swagger_ui(String fName, HttpContext hCtx) {
         hCtx.response.cacheControl(1800)
-        Utils.baseDir("static/swagger-ui/$fName")
+        Utils.baseDir("static/swagger-ui/${fName == '/' ? 'index.html' : fName}")
     }
-
 
     // ==========================js =====================
 
@@ -133,7 +132,11 @@ class MainCtrl extends ServerTpl {
         Utils.baseDir("static/js/lib/$fName")
     }
 
-
+    @Path(path = 'components/:fName')
+    File components(String fName, HttpContext hCtx) {
+        if (app().profile == 'pro') hCtx.response.cacheControl(1800)
+        Utils.baseDir("static/components/$fName")
+    }
     @Path(path = 'views/:fName')
     File views(String fName, HttpContext hCtx) {
         if (app().profile == 'pro') hCtx.response.cacheControl(1800)

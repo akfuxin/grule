@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "GY test API",
-    "description": "GY test",
+    "title": "GRule API",
+    "description": "GRule",
     "contact": {
       "email": "xnatural@msn.cn"
     },
@@ -14,29 +14,100 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8080",
+      "url": "http://localhost:9090",
       "description": "local"
-    },
-    {
-      "url": "http://localhost:7070",
-      "description": "ratpack"
-    },
-    {
-      "url": "https://virtserver.swaggerhub.com/xnat2/gy1/1.0.0",
-      "description": "SwaggerHub API Auto Mocking"
     }
   ],
   "tags": [
     {
+      "name": "rule",
+      "description": "rule api"
+    },
+    {
       "name": "test",
-      "description": "test ctrl api"
+      "description": "test api"
     },
     {
       "name": "main",
-      "description": "main ctrl api"
+      "description": "main api"
     }
   ],
   "paths": {
+    "/decision": {
+      "post": {
+        "tags": ["rule"],
+        "summary": "决策执行",
+        "description": "决策执行",
+        "requestBody": {
+          "description": "表单数据",
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decisionId": {
+                    "type": "string", "required": true, "description": "决策id"
+                  },
+                  "async": {
+                    "type": "boolean", "required": false, "description": "是否异步执行决策"
+                  },
+                  "callback": {
+                    "type": "string", "required": false, "description": "异步执行决策完成后的回调接口地址"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/ApiResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/findDecideResult": {
+      "get": {
+        "tags": ["rule"],
+        "summary": "查询决策结果",
+        "description": "一般用于异步决策查询",
+        "parameters": [
+          {
+            "name": "decideId",
+            "in": "query",
+            "description": "决策结果id",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/ApiResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/test/dao": {
       "post": {
         "tags": ["test"],

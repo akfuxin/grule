@@ -11,13 +11,11 @@ import com.alibaba.fastjson.serializer.SerializerFeature
 import entity.DecideRecord
 import service.rule.DecisionContext
 import service.rule.DecisionManager
-import service.rule.DecisionSrv
 import service.rule.FieldManager
 
 @Ctrl
 class RuleCtrl extends ServerTpl {
 
-    @Lazy def decisionSrv  = bean(DecisionSrv)
     @Lazy def dm           = bean(DecisionManager)
     @Lazy def fieldManager = bean(FieldManager)
     @Lazy def repo         = bean(Repo, 'jpa_rule_repo')

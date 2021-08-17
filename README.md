@@ -330,6 +330,8 @@ end split
   >+ linux: sh start.sh -Xmx512m -Xms512m
   >+ windows: ./start -Xmx512m -Xms512m
 
+* api文档地址: http://localhost:9090/api-doc/
+
 ### 环境要求
 jdk8, gradle7+
 
@@ -348,6 +350,7 @@ jpa_rule.url=jdbc:mysql://localhost:3306/rule?useSSL=false&user=root&password=ro
 ### 开发环境运行
 > 需要添加Groovy sdk 3.0.8
 
+
 IntelliJ IDEA 运行 main.groovy 启动
 
 # v1.2.5 ing...
@@ -356,7 +359,7 @@ IntelliJ IDEA 运行 main.groovy 启动
 - [x] pref: static components -> view
 - [x] style: ace-groovy placeholder
 - [x] style: 首页 loading
-- [ ] feat: rule swagger api
+- [x] feat: rule swagger api
 - [ ] feat: redis 收集器
 
 
