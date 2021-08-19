@@ -353,13 +353,7 @@ jpa_rule.url=jdbc:mysql://localhost:3306/rule?useSSL=false&user=root&password=ro
 
 IntelliJ IDEA 运行 main.groovy 启动
 
-# v1.2.5 ing...
-- [x] pref: 指标名字符限制: 字母,中文开头,可包含字数,字母,下划线,中文
-- [x] feat: app 1.0.7
-- [x] pref: static components -> view
-- [x] style: ace-groovy placeholder
-- [x] style: 首页 loading
-- [x] feat: rule swagger api
+# v1.2.6 ing...
 - [ ] feat: redis 收集器
 
 

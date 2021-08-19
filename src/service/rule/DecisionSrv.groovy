@@ -69,7 +69,7 @@ class DecisionSrv extends ServerTpl {
         if (url) {
             http.post(url).jsonBody(JSON.toJSONString([
                     msgtype: "text",
-                    text: ["content": "RULE(${app().profile}): $msg".toString()],
+                    text: ["content": "GRULE(${app().profile}): $msg".toString()],
                     at: ["isAtAll": false]
             ])).debug().execute()
         }
