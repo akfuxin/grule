@@ -1,6 +1,8 @@
 package service
 
 import cn.xnatural.app.ServerTpl
+import cn.xnatural.app.v.VChain
+import cn.xnatural.app.v.VProcessor
 import cn.xnatural.enet.event.EL
 import cn.xnatural.jpa.Page
 import cn.xnatural.jpa.Repo
@@ -11,8 +13,6 @@ import com.alibaba.fastjson.JSON
 import core.OkHttpSrv
 import core.mode.builder.ObjBuilder
 import core.mode.pipeline.Pipeline
-import core.mode.v.VChain
-import core.mode.v.VProcessor
 import entity.Test
 
 import java.text.SimpleDateFormat
@@ -113,22 +113,22 @@ class TestService extends ServerTpl {
     def testVChain() {
         new VChain().add(new VProcessor() {
             @Override
-            def down(Map ctx) {
+            def pre(Object param) {
                 log.info('down1')
             }
 
             @Override
-            def up(Map ctx) {
+            def post(Object param) {
                 log.info('up1')
             }
         }).add(new VProcessor() {
             @Override
-            def down(Map ctx) {
+            def pre(Object param) {
                 log.info('down2')
             }
 
             @Override
-            def up(Map ctx) {
+            def post(Object param) {
                 log.info('up2')
             }
         }).run()
