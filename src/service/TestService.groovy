@@ -84,37 +84,6 @@ class TestService extends ServerTpl {
     }
 
 
-    // 权限测试
-    def authTest() {
-        def hp = ep.fire('http.hp')
-        if (hp) {
-            log.info("testLogin(admin): " + http.get("http://$hp/test/testLogin?role=admin").execute())
-            log.info("auth(admin): " + http.get("http://$hp/test/auth?role=admin").execute())
-
-            log.info("testLogin(admin): " + http.get("http://$hp/test/testLogin?role=admin").execute())
-            log.info("auth(login): " + http.get("http://$hp/test/auth?role=login").execute())
-
-            log.info("testLogin(role3): " + http.get("http://$hp/test/testLogin?role=role3").execute())
-            log.info("auth(role2_1_1): " + http.get("http://$hp/test/auth?role=role2_1_1").execute())
-
-            log.info("testLogin(role4): " + http.get("http://$hp/test/testLogin?role=role4").execute())
-            log.info("auth(role4_1_1_1): " + http.get("http://$hp/test/auth?role=role4_1_1_1").execute())
-
-            log.info("testLogin(admin): " + http.get("http://$hp/test/testLogin?role=admin").execute())
-            log.info("auth(未知角色名): " + http.get("http://$hp/test/auth?role=未知角色名").execute())
-
-            log.info("testLogin(admin): " + http.get("http://$hp/test/testLogin?role=admin").execute())
-            log.info("auth(role2): " + http.get("http://$hp/test/auth?role=role2").execute())
-
-            log.info("testLogin(role2_1): " + http.get("http://$hp/test/testLogin?role=role2_1").execute())
-            log.info("auth(role2_1_1): " + http.get("http://$hp/test/auth?role=role2_1_1").execute())
-
-            log.info("testLogin(): " + http.get("http://$hp/test/testLogin?role=").execute())
-            log.info("auth(admin): " + http.get("http://$hp/test/auth?role=admin").execute())
-        }
-    }
-
-
     @EL(name = "eName11")
     void taskTest() {
         new TaskContext<>('test ctx', null, exec())
