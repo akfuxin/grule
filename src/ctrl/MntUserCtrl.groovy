@@ -286,7 +286,7 @@ class MntUserCtrl extends ServerTpl {
     ApiResp changePwd(HttpContext hCtx, Long id, String newPassword, String oldPassword) {
         if (!id) return ApiResp.fail("Param id required")
         if (!newPassword) return ApiResp.fail("Param newPassword required")
-        if (Utils.to(hCtx.getSessionAttr("id"), Long) != id) {
+        if (Utils.to(hCtx.getSessionAttr("uId"), Long) != id) {
             return ApiResp.fail("Not permission, only allow change self password")
         }
         def user = repo.findById(User, id)

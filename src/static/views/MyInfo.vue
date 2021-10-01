@@ -17,6 +17,7 @@
     </div>
 </template>
 <script>
+    loadJs('md5')
     module.exports = {
         data() {
             return {
