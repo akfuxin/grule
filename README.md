@@ -324,7 +324,7 @@ end split
 ![Image text](https://gitee.com/xnat/tmp/raw/master/img/userchange.png)
 
 # 使用说明
-> 系统基于java轻量级框架: [APP](https://gitee.com/xnat/app)
+> 系统基于java轻量级框架: [Tiny](https://gitee.com/xnat/tiny)
 1. git clone https://gitee.com/xnat/grule.git
 2.
   >+ linux: sh start.sh -Xmx512m -Xms512m
