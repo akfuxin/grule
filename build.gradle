@@ -49,7 +49,7 @@ dependencies {
 
     implementation 'cn.xnatural.app:tiny:1.0.9'
     implementation 'cn.xnatural.http:http:1.0.9'
-    implementation 'cn.xnatural.jpa:jpa:1.0.6'
+    implementation 'cn.xnatural:jpa:1.0.7'
     implementation 'cn.xnatural.sched:sched:1.0.2'
     implementation 'cn.xnatural.remoter:remoter:1.0.4'
     implementation 'cn.xnatural.task:task:1.0.2'
