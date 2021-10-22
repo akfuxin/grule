@@ -353,7 +353,8 @@ jpa_rule.url=jdbc:mysql://localhost:3306/rule?useSSL=false&user=root&password=ro
 
 IntelliJ IDEA 运行 main.groovy 启动
 
-# v1.2.6 ing...
+# v1.2.7 ing...
+- [x] feat: 清理过期数据: lockTimeout锁超时
 - [ ] feat: redis 收集器
 
 

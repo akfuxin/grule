@@ -13,12 +13,15 @@ import service.rule.DecisionContext
 import service.rule.DecisionManager
 import service.rule.FieldManager
 
+import javax.inject.Inject
+import javax.inject.Named
+
 @Ctrl
 class RuleCtrl extends ServerTpl {
 
-    @Lazy def dm           = bean(DecisionManager)
-    @Lazy def fieldManager = bean(FieldManager)
-    @Lazy def repo         = bean(Repo, 'jpa_rule_repo')
+    @Inject protected DecisionManager dm
+    @Inject protected FieldManager fieldManager
+    @Named("jpa_rule_repo") protected Repo repo
 
 
     /**

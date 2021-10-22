@@ -135,14 +135,17 @@ class DecisionSrv extends ServerTpl {
                             .setParameter("id", dr.id).executeUpdate()
                 }
                 cleanTotal += count
+                // 持续更新锁时间
+                if (cleanTotal % 20 == 0) repo.saveOrUpdate(lock)
                 log.info("Deleted expire decideRecord data: {}", JSON.toJSONString(dr))
             }
 
-            //保留多少条数据. NOTE: 不能多个进程同时删除(多删)
+            //保留多少条数据
             def keepCount = getLong("decideRecord.keepCount", 0)
             if (keepCount > 0) {
                 for (long total = repo.count(DecideRecord); total > keepCount; total--) {
                     clean(repo.find(DecideRecord) { root, query, cb -> query.orderBy(cb.asc(root.get("occurTime")))})
+                    // 为了防止有多个进程在删, 所以每隔10次 重新去统计总, 减少删除误差
                     if (cleanTotal % getInteger("deleteUnit", 10) == 0) {
                         total = repo.count(DecideRecord)
                     }
@@ -178,7 +181,14 @@ class DecisionSrv extends ServerTpl {
                 if (cause.message.contains("Duplicate entry")) {
                     def exist = repo.find(Lock) {root, query, cb -> cb.equal(root.get("name"), lock.name)}
                     if (exist) {
-                        throw new RuntimeException("清理中... 开始时间: " + new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(exist.createTime))
+                        // 当锁隔一段时间没有被更新 就会删除锁, 防止系统意外down,而锁未来的及删的情况发生
+                        if (System.currentTimeMillis() - exist.updateTime.time > Duration.ofMinutes(getLong("lockTimeout", 30)).toMillis()) {
+                            repo.delete(exist)
+                            cleanDecideRecord() // 删除锁后重试
+                            return
+                        } else {
+                            throw new RuntimeException("清理中... 开始时间: " + new SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(exist.createTime))
+                        }
                     } else {
                         throw new RuntimeException("刚清理完")
                     }
