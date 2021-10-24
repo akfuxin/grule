@@ -44,10 +44,8 @@ dependencies {
     // implementation "org.codehaus.groovy:groovy-jmx:$groovyVersion"
 
     //implementation 'com.alibaba:fastjson:1.2.73'
-    implementation 'javax.inject:javax.inject:1'
-    implementation 'ch.qos.logback:logback-classic:1.2.3'
 
-    implementation 'cn.xnatural.app:tiny:1.0.9'
+    implementation 'cn.xnatural:tiny:1.0.10'
     implementation 'cn.xnatural.http:http:1.0.9'
     implementation 'cn.xnatural:jpa:1.0.7'
     implementation 'cn.xnatural.sched:sched:1.0.2'
