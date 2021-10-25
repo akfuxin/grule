@@ -187,7 +187,7 @@ class MntUserCtrl extends ServerTpl {
         }
         //3. grant用户: 随便删
 
-        cacheSrv.remove("permission_" + id)
+        cacheSrv?.remove("permission_" + id)
         return ApiResp.ok(repo.delete(User, id))
     }
 
@@ -276,7 +276,7 @@ class MntUserCtrl extends ServerTpl {
         } else {
             repo.saveOrUpdate(user)
         }
-        cacheSrv.remove("permission_" + user.id)
+        cacheSrv?.remove("permission_" + user.id)
         return resp.attr('id', user.id).attr('name', user.name)
                 .attr('permissions', user.permissions?.split(","))
     }

@@ -53,7 +53,7 @@ class MntCtrl extends ServerTpl {
         hCtx.setAttr('permissions', pIds)
         hCtx.auth("mnt-login")
         if (password != user.password) return ApiResp.fail('密码错误')
-        bean(CacheSrv).set("permission_" + user.id, pIds)
+        bean(CacheSrv)?.set("permission_" + user.id, pIds)
 
         hCtx.setSessionAttr('uId', user.id)
         hCtx.setSessionAttr('uName', user.name)
