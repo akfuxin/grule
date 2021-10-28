@@ -162,7 +162,7 @@
             update() {
                 this.isLoading = true;
                 $.ajax({
-                    url: 'mnt/updateDataCollector',
+                    url: 'mnt/collector/' + this.model.id,
                     type: 'post',
                     data: this.model,
                     success: (res) => {
@@ -182,8 +182,8 @@
             add() {
                 this.isLoading = true;
                 $.ajax({
-                    url: 'mnt/addDataCollector',
-                    type: 'post',
+                    url: 'mnt/collector/',
+                    type: 'put',
                     data: this.model,
                     success: (res) => {
                         this.isLoading = false;
@@ -344,9 +344,8 @@
             enableSwitch(item) {
                 this.$Message.info(`${item.enabled ? '启用' : '禁用'}: ${item.name} ...`);
                 $.ajax({
-                    url: 'mnt/enableDataCollector',
+                    url: 'mnt/collector/enable/' + item.id + "/" + item.enabled,
                     type: 'post',
-                    data: {id: item.id, enabled: item.enabled},
                     success: (res) => {
                         if (res.code === '00') {
                             this.$Message.success(`${item.enabled ? '启用' : '禁用'}: ${item.name} 成功`);
@@ -365,7 +364,8 @@
                 this.$Confirm(`删除收集器: ${collector.name}`, '确定删除?').then(() => {
                     this.$Message(`删除收集器: ${collector.name}`);
                     $.ajax({
-                        url: 'mnt/delDataCollector/' + collector.id,
+                        url: 'mnt/collector/' + collector.id,
+                        type: 'delete',
                         success: (res) => {
                             if (res.code === '00') {
                                 this.$Message.success(`删除收集器: ${collector.name} 成功`);
@@ -378,14 +378,14 @@
                 });
             },
             load(page) {
-                if (page == undefined || page == null) page = {page: 1};
+                if (page === undefined || page === null) page = {page: 1};
                 this.loading = true;
                 this.page = 1;
                 this.pageSize = 10;
                 this.totalRow = 0;
                 this.list = [];
                 $.ajax({
-                    url: 'mnt/dataCollectorPage',
+                    url: 'mnt/collector/page',
                     data: $.extend({page: page.page || 1, id: this.tabs.showId}, this.model),
                     success: (res) => {
                         this.tabs.showId = null;

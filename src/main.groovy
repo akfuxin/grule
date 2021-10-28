@@ -35,7 +35,8 @@ app.addSource(
         remoter(), // 集群分布式
         jpa_rule(), // 数据源rule
         new HttpSrv().ctrls( // 接口层
-                TestCtrl, MainCtrl, RuleCtrl, MntCtrl, MntUserCtrl, MntDecisionCtrl, MntAnalyseCtrl
+                TestCtrl, MainCtrl, RuleCtrl, MntCtrl, MntUserCtrl, MntAnalyseCtrl,
+                MntDecisionCtrl, MntCollectorCtrl
         ),
         new FileUploader(), new CollectorManager(), new TestService(),
         new FieldManager(), new DecisionSrv(), new DecisionManager(),
