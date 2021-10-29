@@ -80,7 +80,7 @@ class UserSrv extends ServerTpl {
             ].each {u ->
                 u.permissions = staticPermission.collect {it.enName}.join(",")
                 repo.saveOrUpdate(u)
-                log.info("添加默认用户. " + u.name + ", " + u.password)
+                log.info("添加默认用户. " + u.name + ", admin")
             }
         }
     }

@@ -118,7 +118,7 @@
                     minWord: 1,
                     loadData: (filter, cb) => {
                         $.ajax({
-                            url: 'mnt/dataCollectorPage',
+                            url: 'mnt/collector/page',
                             data: {page: 1, pageSize: 5, kw: filter},
                             success: (res) => {
                                 this.isLoading = false;

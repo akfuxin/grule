@@ -149,7 +149,7 @@
                         minWord: 1,
                         loadData: (filter, cb) => {
                             $.ajax({
-                                url: 'mnt/dataCollectorPage',
+                                url: 'mnt/collector/page',
                                 data: {page: 1, pageSize: 5, kw: filter},
                                 success: (res) => {
                                     this.isLoading = false;
@@ -178,7 +178,7 @@
                     }
                     this.isLoading = true;
                     $.ajax({
-                        url: 'mnt/updateField',
+                        url: 'mnt/field/' + data.id,
                         type: 'post',
                         data: data,
                         success: (res) => {
@@ -211,8 +211,8 @@
                     }
                     this.isLoading = true;
                     $.ajax({
-                        url: 'mnt/addField',
-                        type: 'post',
+                        url: 'mnt/field/',
+                        type: 'put',
                         data: data,
                         success: (res) => {
                             this.isLoading = false;
@@ -243,7 +243,7 @@
                     minWord: 1,
                     loadData: (filter, cb) => {
                         $.ajax({
-                            url: 'mnt/dataCollectorPage',
+                            url: 'mnt/collector/page',
                             data: {page: 1, pageSize: 5, kw: filter},
                             success: (res) => {
                                 this.isLoading = false;
@@ -337,7 +337,8 @@
                 this.$Confirm(`删除字段: ${field.cnName}`, '确定删除?').then(() => {
                     this.$Message(`删除字段: ${field.cnName}`);
                     $.ajax({
-                        url: 'mnt/delField/' + field.id,
+                        url: 'mnt/field/' + field.id,
+                        type: 'delete',
                         success: (res) => {
                             if (res.code === '00') {
                                 this.$Message.success(`删除字段: ${field.cnName} 成功`);
@@ -357,7 +358,7 @@
                 this.totalRow = 0;
                 this.list = [];
                 $.ajax({
-                    url: 'mnt/fieldPage',
+                    url: 'mnt/field/page',
                     data: $.extend({page: page.page || 1}, this.model),
                     success: (res) => {
                         this.loading = false;

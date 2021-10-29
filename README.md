@@ -358,7 +358,7 @@ IntelliJ IDEA 运行 main.groovy 启动
 - [x] upgrade: cn.xnatural http: 1.0.10
 - [x] refactor: decisionChange 事件拆分 -> decision.delete, decision.update, decision.create
 - [x] refactor: 从 MntDecisionCtrl 中 剔出 MntCollectorCtrl
-- [ ] refactor: 从 MntDecisionCtrl 中 剔出 MntFieldCtrl
+- [x] refactor: 从 MntDecisionCtrl 中 剔出 MntFieldCtrl
 - [ ] refactor: 从 MntDecisionCtrl 中 剔出 MntDataCtrl
 - [ ] feat: 创建用户 添加默认权限
 - [ ] feat: redis 收集器

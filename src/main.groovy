@@ -36,7 +36,7 @@ app.addSource(
         jpa_rule(), // 数据源rule
         new HttpSrv().ctrls( // 接口层
                 TestCtrl, MainCtrl, RuleCtrl, MntCtrl, MntUserCtrl, MntAnalyseCtrl,
-                MntDecisionCtrl, MntCollectorCtrl
+                MntDecisionCtrl, MntCollectorCtrl, MntFieldCtrl
         ),
         new FileUploader(), new CollectorManager(), new TestService(),
         new FieldManager(), new DecisionSrv(), new DecisionManager(),
