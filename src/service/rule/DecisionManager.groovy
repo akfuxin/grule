@@ -44,10 +44,9 @@ class DecisionManager extends ServerTpl {
     }
 
 
-    @EL(name = ['decisionChange', 'decision.dataVersion'], async = true)
-    void listenDecisionChange(EC ec, String id) {
-        if (!id) return
-        def decision = repo.find(Decision) { root, query, cb -> cb.equal(root.get('id'), id)}
+    @EL(name = ['decision.delete', 'decision.update', 'decision.create', 'decision.dataVersion'], async = true)
+    protected void listenDecisionChange(EC ec, String id) {
+        def decision = repo.findById(Decision, id)
         if (decision == null) {
             decisionMap.remove(id)
             log.info("delDecision: " + id)

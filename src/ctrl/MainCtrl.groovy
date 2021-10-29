@@ -43,11 +43,11 @@ class MainCtrl extends ServerTpl {
     ApiResp getCurrentUser(HttpContext hCtx) {
         def uId = hCtx.getSessionAttr('uId')
         if (uId) {
-            def pIds = cacheSrv.get("permission_" + uId)
+            def pIds = cacheSrv?.get("permission_" + uId)
             if (pIds == null) {
                 def permissions = repo.findById(User, Utils.to(uId, Long)).permissions
                 pIds = permissions?.split(',')?.toList()?.toSet()?:Collections.emptySet()
-                cacheSrv.set("permission_" + uId, pIds)
+                cacheSrv?.set("permission_" + uId, pIds)
             }
             hCtx.setAttr('permissions', pIds)
             return ApiResp.ok().attr('id', uId)

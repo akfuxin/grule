@@ -327,7 +327,6 @@ class MntDecisionCtrl extends ServerTpl {
      * @param dsl 决策DSL
      * @param apiConfig api配置
      * @param hCtx {@link HttpContext}
-     * @return
      */
     @Path(path = 'setDecision', method = 'post')
     ApiResp setDecision(String id, String dsl, String apiConfig, HttpContext hCtx) {
@@ -403,7 +402,7 @@ class MntDecisionCtrl extends ServerTpl {
             }
             throw ex
         }
-        ep.fire("decisionChange", decision.id)
+        ep.fire(id ? "decision.update" : "decision.create", decision.id)
         ep.fire('enHistory', decision, hCtx.getSessionAttr('uName'))
         ApiResp.ok(decision)
     }
@@ -669,7 +668,7 @@ class MntDecisionCtrl extends ServerTpl {
         hCtx.auth( 'decision-del-' + id)
         def decision = repo.find(Decision) {root, query, cb -> cb.equal(root.get('id'), id)}
         repo.delete(decision)
-        ep.fire('decisionChange', decision.id)
+        ep.fire('decision.delete', decision.id)
         ep.fire('enHistory', decision, hCtx.getSessionAttr('uName'))
         ApiResp.ok()
     }

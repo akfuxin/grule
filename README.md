@@ -355,6 +355,8 @@ IntelliJ IDEA 运行 main.groovy 启动
 
 # v1.2.7 ing...
 - [x] feat: 清理过期数据: lockTimeout锁超时
+- [x] refactor: decisionChange 事件拆分 -> decision.delete, decision.update, decision.create
+- [ ] feat: 创建用户 添加默认权限
 - [ ] upgrade: cn.xnatural http: 1.0.10
 - [ ] refactor: MntDecisionCtrl 把 collector, field相关代码剔出
 - [ ] feat: redis 收集器
