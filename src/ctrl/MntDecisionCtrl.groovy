@@ -1,6 +1,5 @@
 package ctrl
 
-
 import cn.xnatural.app.ServerTpl
 import cn.xnatural.app.Utils
 import cn.xnatural.http.ApiResp
@@ -12,23 +11,20 @@ import cn.xnatural.jpa.Repo
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.alibaba.fastjson.parser.Feature
-import entity.*
-import service.rule.*
+import entity.Decision
+import entity.OpHistory
+import service.rule.CollectorManager
+import service.rule.DecisionManager
+import service.rule.FieldManager
 import service.rule.spec.DecisionSpec
 
 import java.text.SimpleDateFormat
-import java.util.Map.Entry
 
 @Ctrl(prefix = 'mnt')
 class MntDecisionCtrl extends ServerTpl {
 
     @Lazy protected repo = bean(Repo, 'jpa_rule_repo')
-    @Lazy protected decisionManager = bean(DecisionManager)
-    @Lazy protected fieldManager = bean(FieldManager)
     @Lazy protected collectorManager = bean(CollectorManager)
-    // 指标字符限制: 字母,中文开头,可包含字数,字母,下划线,中文
-    @Lazy protected fieldNamePattern = /^[a-zA-Z\u4E00-\u9FA5]+[0-9a-zA-Z\u4E00-\u9FA5_]*$/
 
 
     @Path(path = 'decisionPage')
@@ -84,179 +80,6 @@ class MntDecisionCtrl extends ServerTpl {
                     ps << cb.equal(root.get('tbName'), repo.tbName(Class.forName(Decision.package.name + "." + type)).replace("`", ""))
                 }
                 ps ? ps.inject {p1, p2 -> cb.and(p1, p2)} : null
-            }
-        )
-    }
-
-
-    @Path(path = 'decisionResultPage')
-    ApiResp decisionResultPage(
-            HttpContext hCtx, Integer page, Integer pageSize, String id, String decisionId, DecideResult result,
-            Long spend, String exception, String attrConditions, String startTime, String endTime
-    ) {
-        hCtx.auth("decideResult-read")
-        if (pageSize && pageSize > 10) return ApiResp.fail("Param pageSize <=10")
-        def ids = hCtx.getAttr("permissions", Set)
-            .findAll {String p -> p.startsWith("decision-read-")}
-            .findResults {String p -> p.replace("decision-read-", "")}
-            .findAll {it}
-        if (!ids) return ApiResp.ok()
-        Date start = startTime ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(startTime) : null
-        Date end = endTime ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endTime) : null
-        ApiResp.ok(
-                repo.findPage(DecideRecord, page, pageSize?:10) { root, query, cb ->
-                    def ps = []
-                    if (start) ps << cb.greaterThanOrEqualTo(root.get('occurTime'), start)
-                    if (end) ps << cb.lessThanOrEqualTo(root.get('occurTime'), end)
-                    if (id) ps << cb.equal(root.get('id'), id)
-                    ps << root.get('decisionId').in(ids)
-                    if (decisionId) ps << cb.equal(root.get('decisionId'), decisionId)
-                    if (spend) ps << cb.ge(root.get('spend'), spend)
-                    if (result) ps << cb.equal(root.get('result'), result)
-                    if (exception) ps << cb.like(root.get('exception'), '%' + exception + '%')
-                    def orders = []
-                    if (attrConditions) { // json查询 暂时只支持mysql5.7+,MariaDB 10.2.3+
-                        JSON.parseArray(attrConditions).each {JSONObject jo ->
-                            def fieldId = jo.getLong('fieldId')
-                            if (!fieldId) return
-                            def field = fieldManager.fieldHolders.find {it.value.field.id == fieldId}?.value?.field
-                            if (field == null) return
-
-                            def exp = cb.function("JSON_EXTRACT", String, root.get('data'), cb.literal('$.' + field.enName))
-                            def op = jo['op']
-                            if (op == "desc") { //降序
-                                orders << cb.desc(exp.as(field.type.clzType))
-                                return
-                            } else if (op == 'asc') { //升序
-                                orders << cb.asc(exp.as(field.type.clzType))
-                                return
-                            }
-                            def value = jo['value']
-                            if (value == null || value.empty) return
-
-                            if (op == '=') {
-                                ps << cb.equal(exp, value)
-                            } else if (op == '>') {
-                                ps << cb.gt(exp.as(field.type.clzType), Utils.to(value, field.type.clzType))
-                            } else if (op == '<') {
-                                ps << cb.lt(exp.as(field.type.clzType), Utils.to(value, field.type.clzType))
-                            } else if (op == '>=') {
-                                ps << cb.ge(exp.as(field.type.clzType), Utils.to(value, field.type.clzType))
-                            } else if (op == '<=') {
-                                ps << cb.le(exp.as(field.type.clzType), Utils.to(value, field.type.clzType))
-                            } else if (op == 'contains') {
-                                ps << cb.like(exp, '%' + value + '%')
-                            } else throw new IllegalArgumentException("Param attrCondition op('$op') unknown")
-                        }
-                    }
-                    if (orders) { // 按照data中的属性进行排序
-                        query.orderBy(orders)
-                    } else { // 默认时间降序
-                        query.orderBy(cb.desc(root.get('occurTime')))
-                    }
-                    ps ? ps.inject {p1, p2 -> cb.and(p1, p2)} : null
-                }.to{
-                    Utils.toMapper(it).ignore("metaClass")
-                            .addConverter('decisionId', 'decisionName', { String dId ->
-                                decisionManager.decisionMap.find {it.value.decision.id == dId}?.value?.decision?.name
-                            }).addConverter('data', {String jsonStr ->
-                                it == null ? null : JSON.parseObject(jsonStr, Feature.OrderedField).collect { e ->
-                                    [enName: e.key, cnName: fieldManager.fieldHolders.get(e.key)?.field?.cnName, value: e.value]
-                                }}).addConverter('input', {jsonStr ->
-                                    it == null ? null : JSON.parseObject(jsonStr)
-                                }).addConverter('dataCollectResult', {String jsonStr ->
-                                    it == null ? null : JSON.parseObject(jsonStr, Feature.OrderedField).collectEntries { e ->
-                                        // 格式为: collectorId[_数据key], 把collectorId替换为收集器名字
-                                        String collectorId
-                                        def arr = e.key.split("_")
-                                        if (arr.length == 1) collectorId = e.key
-                                        else collectorId = arr[0]
-                                        [
-                                                (collectorManager.collectorHolders.findResult {
-                                                    it.value.collector.id == collectorId ? it.value.collector.name + (arr.length > 1 ? '_' + arr.drop(1).join('_') : '') : null
-                                                }?:e.key): e.value
-                                        ]
-                                    }
-                                }).addConverter('detail', {String detailJsonStr ->
-                                    if (!detailJsonStr) return null
-                                    def detailJo = JSON.parseObject(detailJsonStr, Feature.OrderedField)
-                                    // 数据转换
-                                    detailJo.put('data', detailJo.getJSONObject('data')?.collect { Entry<String, Object> e ->
-                                        [enName: e.key, cnName: fieldManager.fieldHolders.get(e.key)?.field?.cnName, value: e.value]
-                                    }?:null)
-                                    detailJo.getJSONArray('policies')?.each {JSONObject pJo ->
-                                        pJo.put('data', pJo.getJSONObject('data')?.collect { Entry<String, Object> e ->
-                                            [enName: e.key, cnName: fieldManager.fieldHolders.get(e.key)?.field?.cnName, value: e.value]
-                                        }?:null)
-                                        pJo.getJSONArray('items')?.each {JSONObject rJo ->
-                                            rJo.put('data', rJo.getJSONObject('data')?.collect { Entry<String, Object> e ->
-                                                [enName: e.key, cnName: fieldManager.fieldHolders.get(e.key)?.field?.cnName, value: e.value]
-                                            }?:null)
-                                        }
-                                    }
-                                    detailJo
-                                }).build()
-                }
-        )
-    }
-
-
-    @Path(path = 'collectResultPage')
-    ApiResp collectResultPage(
-        HttpContext hCtx, Integer page, Integer pageSize, String decideId, String collectorType, String collector, String decisionId,
-        Long spend, Boolean success, Boolean dataSuccess, Boolean cache, String startTime, String endTime
-    ) {
-        hCtx.auth("collectResult-read")
-        def ids = hCtx.getAttr("permissions", Set)
-            .findAll {String p -> p.startsWith("decision-read-")}
-            .findResults {String p -> p.replace("decision-read-", "")}
-            .findAll {it}
-        if (!ids) return ApiResp.ok()
-        Date start = startTime ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(startTime) : null
-        Date end = endTime ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endTime) : null
-        if (pageSize && pageSize > 50) return ApiResp.fail("Param pageSize <=50")
-        ApiResp.ok(
-            repo.findPage(CollectRecord, page, pageSize?:10) { root, query, cb ->
-                query.orderBy(cb.desc(root.get('collectDate')))
-                def ps = []
-                if (start) ps << cb.greaterThanOrEqualTo(root.get('collectDate'), start)
-                if (end) ps << cb.lessThanOrEqualTo(root.get('collectDate'), end)
-                if (decideId) ps << cb.equal(root.get('decideId'), decideId)
-                ps << root.get('decisionId').in(ids)
-                if (decisionId) ps << cb.equal(root.get('decisionId'), decisionId)
-                if (collectorType) ps << cb.equal(root.get('collectorType'), collectorType)
-                if (collector) ps << cb.equal(root.get('collector'), collector)
-                if (spend) ps << cb.ge(root.get('spend'), spend)
-                if (success != null) {
-                    if (success) {
-                        ps << cb.equal(root.get('status'), '0000')
-                    } else {
-                        ps << cb.notEqual(root.get('status'), '0000')
-                    }
-                }
-                if (dataSuccess != null) {
-                    if (dataSuccess) {
-                        ps << cb.equal(root.get('dataStatus'), '0000')
-                    } else {
-                        ps << cb.notEqual(root.get('dataStatus'), '0000')
-                    }
-                }
-                if (cache != null) {
-                    if (cache) {
-                        ps << cb.equal(root.get('cache'), true)
-                    } else {
-                        ps << cb.notEqual(root.get('cache'), true)
-                    }
-                }
-                ps ? ps.inject {p1, p2 -> cb.and(p1, p2)} : null
-            }.to{record -> Utils.toMapper(record).ignore("metaClass")
-                .addConverter('decisionId', 'decisionName', {String dId ->
-                    decisionManager.decisionMap.find {it.value.decision.id == dId}?.value?.decision?.name
-                }).addConverter('collector', 'collectorName', {String cId ->
-                    collectorManager.collectorHolders.get(cId)?.collector?.name
-                }).addConverter('collector', 'collectorType', {String cId ->
-                    collectorManager.collectorHolders.get(cId)?.collector?.type
-                }).build()
             }
         )
     }
@@ -359,13 +182,5 @@ class MntDecisionCtrl extends ServerTpl {
         ep.fire('decision.delete', decision.id)
         ep.fire('enHistory', decision, hCtx.getSessionAttr('uName'))
         ApiResp.ok()
-    }
-
-
-    @Path(path = 'cleanExpire')
-    ApiResp cleanExpire(HttpContext hCtx) {
-        hCtx.auth("grant")
-        bean(DecisionSrv).cleanDecideRecord()
-        return ApiResp.ok().desc("等待后台清理完成...")
     }
 }

@@ -90,7 +90,7 @@
             load(cb) {
                 this.loading = true
                 $.ajax({
-                    url: 'mnt/countDecide',
+                    url: 'mnt/data/countDecide',
                     data: this.model,
                     success: (res) => {
                         this.loading = false

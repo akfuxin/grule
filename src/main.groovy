@@ -2,7 +2,6 @@ import cn.xnatural.app.AppContext
 import cn.xnatural.app.CacheSrv
 import cn.xnatural.app.ServerTpl
 import cn.xnatural.enet.event.EL
-import cn.xnatural.enet.event.EP
 import cn.xnatural.jpa.Repo
 import cn.xnatural.remoter.Remoter
 import cn.xnatural.sched.Sched
@@ -20,7 +19,6 @@ import service.rule.*
 
 import java.time.Duration
 
-
 System.setProperty("configdir", "../conf")
 @Field final Logger log = LoggerFactory.getLogger("ROOT")
 @Field final AppContext app = new AppContext() //应用上下文
@@ -35,8 +33,8 @@ app.addSource(
         remoter(), // 集群分布式
         jpa_rule(), // 数据源rule
         new HttpSrv().ctrls( // 接口层
-                TestCtrl, MainCtrl, RuleCtrl, MntCtrl, MntUserCtrl, MntAnalyseCtrl,
-                MntDecisionCtrl, MntCollectorCtrl, MntFieldCtrl
+                TestCtrl, MainCtrl, RuleCtrl, MntCtrl, MntUserCtrl,
+                MntDecisionCtrl, MntCollectorCtrl, MntFieldCtrl, MntDataCtrl
         ),
         new FileUploader(), new CollectorManager(), new TestService(),
         new FieldManager(), new DecisionSrv(), new DecisionManager(),

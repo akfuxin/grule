@@ -104,7 +104,7 @@
             load(cb) {
                 this.loading = true
                 $.ajax({
-                    url: 'mnt/countRule',
+                    url: 'mnt/data/countRule',
                     data: this.model,
                     success: (res) => {
                         this.loading = false

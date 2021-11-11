@@ -344,7 +344,7 @@ CREATE DATABASE IF NOT EXISTS rule DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 ```
 ```properties
 # 替换 conf/app.properties 中的 jpa_rule.url 配置项
-jpa_rule.url=jdbc:mysql://localhost:3306/rule?useSSL=false&user=root&password=root&useUnicode=true&characterEncoding=utf-8
+jpa_rule.url=jdbc:mysql://localhost:3306/rule?useSSL=false&user=root&password=root&useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true
 ```
 
 ### 开发环境运行
@@ -359,7 +359,7 @@ IntelliJ IDEA 运行 main.groovy 启动
 - [x] refactor: decisionChange 事件拆分 -> decision.delete, decision.update, decision.create
 - [x] refactor: 从 MntDecisionCtrl 中 剔出 MntCollectorCtrl
 - [x] refactor: 从 MntDecisionCtrl 中 剔出 MntFieldCtrl
-- [ ] refactor: 从 MntDecisionCtrl 中 剔出 MntDataCtrl
+- [x] refactor: 从 MntDecisionCtrl 中 剔出 MntDataCtrl
 - [ ] feat: 创建用户 添加默认权限
 - [ ] feat: redis 收集器
 

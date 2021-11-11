@@ -303,7 +303,7 @@
                     minWord: 1,
                     loadData: (filter, cb) => {
                     $.ajax({
-                        url: 'mnt/fieldPage',
+                        url: 'mnt/field/page',
                         data: {page: 1, pageSize: 5, kw: filter},
                         success: (res) => {
                             this.isLoading = false;
@@ -328,8 +328,6 @@
                 this.tabs.type = 'DecisionConfig';
             },
             showDetail(item, event) {
-                // h-table-tr-hovered
-                //console.log('===========', event)
                 this.$Modal({
                     draggable: false, hasCloseIcon: true, fullScreen: false, transparent: false, closeOnMask: true,
                     type: 'drawer-right',
@@ -352,7 +350,7 @@
                 return v
             },
             load(page) {
-                if (page == undefined || page == null) page = {page: 1};
+                if (page === undefined || page == null) page = {page: 1};
                 this.loading = true;
                 this.page = 1;
                 this.pageSize = 10;
@@ -364,7 +362,7 @@
                     delete data.attrFilters;
                 }
                 $.ajax({
-                    url: 'mnt/decisionResultPage',
+                    url: 'mnt/data/decisionResultPage',
                     data: data,
                     success: (res) => {
                         this.loading = false;

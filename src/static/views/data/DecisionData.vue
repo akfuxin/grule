@@ -41,7 +41,7 @@
         methods: {
             cleanExpire() {
                 $.ajax({
-                    url: 'mnt/cleanExpire',
+                    url: 'mnt/data/cleanExpire',
                     success: (res) => {
                         if (res.code === '00') {
                             this.$Message.success(res.desc);

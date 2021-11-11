@@ -208,14 +208,14 @@
                 this.$set(data, '_expand', !data._expand);
             },
             load(page) {
-                if (page == undefined || page == null) page = {page: 1};
+                if (page === undefined || page == null) page = {page: 1};
                 this.loading = true;
                 this.page = 1;
                 this.pageSize = 10;
                 this.totalRow = 0;
                 this.list = [];
                 $.ajax({
-                    url: 'mnt/collectResultPage',
+                    url: 'mnt/data/collectResultPage',
                     data: $.extend({page: page.page || 1}, this.model),
                     success: (res) => {
                         this.loading = false;
