@@ -171,7 +171,7 @@
             }
         },
         watch: {
-            'decision.apiConfig': function (v) {
+            'decision.apiConfig': (v) => {
                 this.parseApiConfig()
             }
         },
@@ -185,7 +185,7 @@
                 this.decision.apiConfigO = JSON.parse(this.decision.apiConfig);
                 if (this.decision.apiConfigO == null) this.decision.apiConfigO = [];
                 for (let item of this.decision.apiConfigO) { //固定值: 只读
-                    if (item.fixValue != undefined && item.fixValue != null && item.fixValue != "") item._readonly = true;
+                    if (item.fixValue !== undefined && item.fixValue !== null && item.fixValue !== "") item._readonly = true;
                     else item._readonly = false;
                 }
                 if (this.apiConfig) {
@@ -304,10 +304,10 @@
                 decision: {
                     page: 1, pageSize: 2, totalRow: 0, list: []
                 },
-                collapse: null, curDecision: null,
+                collapse: null
             };
         },
-        mounted: function () {
+        mounted() {
             this.load()
         },
         activated() {
@@ -315,7 +315,6 @@
         },
         methods: {
             showApiPop(item) {
-                this.curDecision = item;
                 this.$Modal({
                     title: `API配置: ${item.name}`,
                     component: {
@@ -325,7 +324,8 @@
                     middle: false, draggable: true, closeOnMask: false, hasCloseIcon: true, fullScreen: true, transparent: false,
                     events: {
                         update: () => {
-                            this.save()
+                            if (item.id) this.updateApiConfig(item)
+                            else this.save(item)
                         }
                     }
                 })
@@ -346,13 +346,15 @@
                     this.$Confirm(`删除决策: ${item.name}`, '确定删除?').then(() => {
                         this.$Message(`删除决策: ${item.name }`);
                         $.ajax({
-                            url: 'mnt/delDecision/' + item.id,
+                            url: 'mnt/decision/' + item.id,
+                            type: 'delete',
                             success: (res) => {
                                 if (res.code === '00') {
                                     this.$Message.success(`删除决策: ${item.name}成功`);
-                                  this.load();
-                                  localStorage.removeItem('rule.test.' + item.decisionId)
-                                } else this.$Notice.error(res.desc)
+                                    let index = this.decision.list.indexOf(item);
+                                    this.decision.list.splice(index, 1);
+                                    localStorage.removeItem('rule.test.' + item.decisionId)
+                                } else this.$Message.error(res.desc)
                             }
                         });
                     }).catch(() => {
@@ -364,23 +366,44 @@
                 }
             },
             save(decision) {
-                decision = decision || this.curDecision;
-                this.$Message.info((decision.id ? '更新' : '新增') + '决策: ' + decision.name + ' ...');
+                if (decision.id) this.updateDsl(decision)
+                else { // 创建新的
+                    this.$Message.info('新增决策: ' + decision.name + ' ...');
+                    $.ajax({
+                        url: 'mnt/decision/',
+                        type: 'put',
+                        data: {dsl: decision.dsl, apiConfig: decision.apiConfigO ? JSON.stringify(decision.apiConfigO) : decision.apiConfig},
+                        success: (res) => {
+                            if (res.code === '00') {
+                                $.extend(decision, res.data);
+                                this.$Message.success('新增决策成功: ' + res.data.name);
+                            } else this.$Message.error(res.desc)
+                        },
+                    })
+                }
+            },
+            updateDsl(decision) {
+                this.$Message.info('更新决策: ' + decision.name + ' ...');
                 $.ajax({
-                    url: 'mnt/setDecision',
+                    url: 'mnt/decision/updateDsl/' + decision.id,
                     type: 'post',
-                    data: {id: decision.id, dsl: decision.dsl, apiConfig: decision.apiConfigO ? JSON.stringify(decision.apiConfigO) : decision.apiConfig},
+                    data: {dsl: decision.dsl},
                     success: (res) => {
                         if (res.code === '00') {
-                            if (decision.id) {
-                                $.extend(decision, res.data);
-                                this.$Message.success('更新成功: ' + decision.name);
-                            } else {
-                                //$.extend(decision, res.data);
-                                //decision.apiConfigO = decision.apiConfig ? JSON.parse(decision.apiConfig) : null;
-                                this.$Message.success('新增成功: ' + res.data.name);
-                                this.load();
-                            }
+                            this.$Message.success('更新决策成功: ' + decision.name)
+                        } else this.$Message.error(res.desc)
+                    }
+                })
+            },
+            updateApiConfig(decision) {
+                this.$Message.info('更新决策Api配置: ' + decision.name + ' ...');
+                $.ajax({
+                    url: 'mnt/decision/updateApiConfig/' + decision.id,
+                    type: 'post',
+                    data: {apiConfig: decision.apiConfigO ? JSON.stringify(decision.apiConfigO) : decision.apiConfig},
+                    success: (res) => {
+                        if (res.code === '00') {
+                            this.$Message.success('更新决策Api配置成功: ' + decision.name)
                         } else this.$Message.error(res.desc)
                     }
                 })
@@ -400,16 +423,8 @@
                         {
                             "code": "callback", "name": "回调地址", "type": "Str", "require": false,
                         },
-                        // {
-                        //     "code": "idNumber", "name": "身份证", "type": "Str", "require": true, "fixLength": 18
-                        // },
-                        // {
-                        //     "code": "mobileNo", "name": "手机号", "type": "Str", "require": true, "fixLength": 11
-                        // },
-                        // {
-                        //     "code": "name", "name": "姓名", "type": "Str", "require": true, "maxLength": 20
-                        // }
                     ],
+                    _readonly: false, _deletable: true,
                     dsl:
 `// 保存: Ctrl+s, 查找: Ctrl+f
 决策id = '${decisionId}'
@@ -438,17 +453,17 @@
                 })
             },
             load(page) {
-                if (page == undefined || page == null) page = {page: 1};
+                if (page === undefined || page == null) page = {page: 1};
                 this.decisionLoading = true;
                 this.decision = {};
                 $.ajax({
-                    url: 'mnt/decisionPage',
+                    url: 'mnt/decision/page',
                     data: $.extend({page: page.page || 1, pageSize: 10, decisionId: this.tabs.showId}, this.model),
                     success: (res) => {
                         this.decisionLoading = false;
                         if (res.code === '00') {
                             this.decision = res.data;
-                        } else this.$Notice.error(res.desc)
+                        } else this.$Message.error(res.desc)
                     },
                     error: (xhr) => {
                         this.decisionLoading = false

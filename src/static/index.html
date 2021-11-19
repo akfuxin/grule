@@ -74,6 +74,9 @@
             } else if (xhr.status == 403) {
                 app.$Message.warn('没有权限');
             }
+        },
+        error: (xhr) => {
+            this.$Message.error(`${xhr.status} : ${xhr.responseText}`)
         }
     });
 </script>

@@ -12,22 +12,17 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import entity.Decision
-import entity.OpHistory
 import service.rule.CollectorManager
-import service.rule.DecisionManager
-import service.rule.FieldManager
 import service.rule.spec.DecisionSpec
 
-import java.text.SimpleDateFormat
-
-@Ctrl(prefix = 'mnt')
+@Ctrl(prefix = 'mnt/decision')
 class MntDecisionCtrl extends ServerTpl {
 
     @Lazy protected repo = bean(Repo, 'jpa_rule_repo')
     @Lazy protected collectorManager = bean(CollectorManager)
 
 
-    @Path(path = 'decisionPage')
+    @Path(path = 'page')
     ApiResp decisionPage(HttpContext hCtx, Integer page, Integer pageSize, String kw, String nameLike, String decisionId) {
         if (pageSize && pageSize > 20) return ApiResp.fail("Param pageSize <=20")
         // 允许访问的决策id
@@ -63,38 +58,16 @@ class MntDecisionCtrl extends ServerTpl {
     }
 
 
-    @Path(path = 'opHistoryPage')
-    ApiResp opHistoryPage(HttpContext hCtx, Integer page, Integer pageSize, String kw, String type, String startTime, String endTime) {
-        if (pageSize && pageSize > 20) return ApiResp.fail("Param pageSize <=20")
-        hCtx.auth("opHistory-read")
-        Date start = startTime ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(startTime) : null
-        Date end = endTime ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endTime) : null
-        ApiResp.ok(
-            repo.findPage(OpHistory, page, pageSize?:5) { root, query, cb ->
-                query.orderBy(cb.desc(root.get('createTime')))
-                def ps = []
-                if (kw) ps << cb.like(root.get('content'), '%' + kw + '%')
-                if (start) ps << cb.greaterThanOrEqualTo(root.get('createTime'), start)
-                if (end) ps << cb.lessThanOrEqualTo(root.get('createTime'), end)
-                if (type) {
-                    ps << cb.equal(root.get('tbName'), repo.tbName(Class.forName(Decision.package.name + "." + type)).replace("`", ""))
-                }
-                ps ? ps.inject {p1, p2 -> cb.and(p1, p2)} : null
-            }
-        )
-    }
-
-
     /**
-     * 设置一条决策
-     * @param id 决策数据库中的Id 如果为空, 则为新建
+     * 添加一条决策
      * @param dsl 决策DSL
      * @param apiConfig api配置
      * @param hCtx {@link HttpContext}
      */
-    @Path(path = 'setDecision', method = 'post')
-    ApiResp setDecision(String id, String dsl, String apiConfig, HttpContext hCtx) {
-        if (!dsl) return ApiResp.fail("Param dsl not empty")
+    @Path(path = '/', method = 'put')
+    ApiResp add(HttpContext hCtx, String dsl, String apiConfig) {
+        if (!dsl) return ApiResp.fail("Param dsl required")
+        hCtx.auth('decision-add')
         DecisionSpec spec
         try {
             spec = DecisionSpec.of(dsl)
@@ -102,31 +75,115 @@ class MntDecisionCtrl extends ServerTpl {
             log.error("语法错误", ex)
             return ApiResp.fail('语法错误: ' + ex.message)
         }
-
         //dsl 验证
         if (!spec.决策id) return ApiResp.fail("决策id 不能为空")
         if (!spec.决策名) return ApiResp.fail("决策名 不能为空")
 
-        Decision decision
-        if (id) { // 更新
-            decision = repo.findById(Decision, id)
-            hCtx.auth('decision-update-' + decision.id)
-            if (decision.decisionId != spec.决策id) {
-                if (repo.find(Decision) {root, query, cb -> cb.equal(root.get('decisionId'), spec.决策id)}) { // 决策id 不能重
-                    return ApiResp.fail("决策id($spec.决策id)已存在")
+        final decision = new Decision(
+                decisionId: spec.决策id, name: spec.决策名, comment: spec.决策描述,
+                dsl: dsl, creator: hCtx.getSessionAttr("uName")
+        )
+        adjustApiConfig(decision, apiConfig)
+
+        try {
+            repo.saveOrUpdate(decision)
+        } catch (ex) {
+            def cause = ex
+            while (cause != null) {
+                if (cause.message.contains("Duplicate entry")) {
+                    if (cause.message.contains("decisionId")) {
+                        return ApiResp.fail("决策id($spec.决策id)已存在")
+                    }
                 }
+                cause = cause.cause
             }
-            decision.updater = hCtx.getSessionAttr("uName")
-        } else { // 创建
-            hCtx.auth('decision-add')
-            decision = new Decision()
-            decision.creator = hCtx.getSessionAttr("uName")
+            throw ex
         }
-        decision.decisionId = spec.决策id
-        decision.name = spec.决策名
-        decision.comment = spec.决策描述
+        ep.fire("decision.create", decision.id)
+        ep.fire('enHistory', decision, decision.creator)
+        ApiResp.ok(decision)
+    }
+
+
+    @Path(path = "updateDsl/:id", method = "post")
+    ApiResp updateDsl(HttpContext hCtx, String id, String dsl) {
+        if (!id) return ApiResp.fail("Param id required")
+        if (!dsl) return ApiResp.fail("Param dsl required")
+        def decision = repo.findById(Decision, id)
+        if (!decision) return ApiResp.fail("Param id not found")
+        hCtx.auth('decision-update-' + id)
+
+        DecisionSpec spec
+        try {
+            spec = DecisionSpec.of(dsl)
+        } catch (ex) {
+            log.error("语法错误", ex)
+            return ApiResp.fail('语法错误: ' + ex.message)
+        }
+        //dsl 验证
+        if (!spec.决策id) return ApiResp.fail("决策id 不能为空")
+        if (!spec.决策名) return ApiResp.fail("决策名 不能为空")
         decision.dsl = dsl
-        if (apiConfig) { //矫正decisionId参数
+        decision.name = spec.决策名
+        decision.decisionId = spec.决策id
+        decision.comment = spec.决策描述
+        decision.updater = hCtx.getSessionAttr('uName')
+
+        try {
+            repo.saveOrUpdate(decision)
+        } catch (ex) {
+            def cause = ex
+            while (cause != null) {
+                if (cause.message.contains("Duplicate entry")) {
+                    if (cause.message.contains("decisionId")) {
+                        return ApiResp.fail("决策id($spec.决策id)已存在")
+                    }
+                }
+                cause = cause.cause
+            }
+            throw ex
+        }
+
+        ep.fire("decision.update", decision.id)
+        ep.fire('enHistory', decision, decision.updater)
+        ApiResp.ok(decision)
+    }
+
+
+    @Path(path = "updateApiConfig/:id", method = "post")
+    ApiResp updateApiConfig(HttpContext hCtx, String id, String apiConfig) {
+        if (!id) return ApiResp.fail("Param id required")
+        def decision = repo.findById(Decision, id)
+        if (!decision) return ApiResp.fail("Param id not found")
+        hCtx.auth('decision-update-' + id)
+
+        adjustApiConfig(decision, apiConfig)
+        decision.updater = hCtx.getSessionAttr('uName')
+        repo.saveOrUpdate(decision)
+
+        ep.fire("decision.update", decision.id)
+        ep.fire('enHistory', decision, decision.updater)
+        ApiResp.ok(decision)
+    }
+
+
+    @Path(path = ':id', method = "delete")
+    ApiResp del(HttpContext hCtx, String id) {
+        if (!id) return ApiResp.fail("Param id required")
+        def decision = repo.findById(Decision, id)
+        if (!decision) return ApiResp.fail("Param id not found")
+        hCtx.auth( 'decision-del-' + id)
+        repo.delete(decision)
+
+        ep.fire('decision.delete', decision.id)
+        // ep.fire('enHistory', decision, hCtx.getSessionAttr('uName'))
+        ApiResp.ok()
+    }
+
+
+    // 更新 适配 api配置 参数
+    protected void adjustApiConfig(Decision decision, String apiConfig) {
+        if (apiConfig) {
             def params = JSON.parseArray(apiConfig)
             JSONObject param = params.find {JSONObject jo -> "decisionId" == jo.getString("code")}
             if (param) {
@@ -143,44 +200,12 @@ class MntDecisionCtrl extends ServerTpl {
                     if (ittt.next().key.startsWith('_')) ittt.remove()
                 }
             }
-            apiConfig = params.toString()
+            decision.apiConfig = params.toString()
         } else {
-            apiConfig = new JSONArray().add(
-                new JSONObject().fluentPut("code", "decisionId").fluentPut("type", "Str")
-                    .fluentPut("fixValue", decision.decisionId).fluentPut("name", "决策id").fluentPut("require", true)
+            decision.apiConfig = new JSONArray().add(
+                    new JSONObject().fluentPut("code", "decisionId").fluentPut("type", "Str")
+                            .fluentPut("fixValue", decision.decisionId).fluentPut("name", "决策id").fluentPut("require", true)
             ).toString()
         }
-        decision.apiConfig = apiConfig
-
-        try {
-            repo.saveOrUpdate(decision)
-        } catch (ex) {
-            def cause = ex
-            while (cause != null) {
-                if (cause.message.contains("Duplicate entry")) {
-                    if (cause.message.contains("decisionId")) {
-                        return ApiResp.fail("决策id($spec.决策id)已存在")
-                    }
-                }
-                cause = cause.cause
-            }
-            throw ex
-        }
-        ep.fire(id ? "decision.update" : "decision.create", decision.id)
-        ep.fire('enHistory', decision, hCtx.getSessionAttr('uName'))
-        ApiResp.ok(decision)
-    }
-
-
-
-    @Path(path = 'delDecision/:id')
-    ApiResp delDecision(HttpContext hCtx, String id) {
-        if (!id) return ApiResp.fail("Param id required")
-        hCtx.auth( 'decision-del-' + id)
-        def decision = repo.find(Decision) {root, query, cb -> cb.equal(root.get('id'), id)}
-        repo.delete(decision)
-        ep.fire('decision.delete', decision.id)
-        ep.fire('enHistory', decision, hCtx.getSessionAttr('uName'))
-        ApiResp.ok()
     }
 }
