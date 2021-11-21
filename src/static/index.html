@@ -44,7 +44,7 @@
             getCurrentUser() {
                 this.loading = true;
                 $.ajax({
-                    url: 'getCurrentUser',
+                    url: 'mnt/currentUser',
                     success: (res) => {
                         this.loading = false;
                         if (res.code === '00') {

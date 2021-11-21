@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject
 import entity.UserSession
 
 import java.time.Duration
+import java.util.function.Supplier
 
 /**
  * web 服务
@@ -156,7 +157,10 @@ class HttpSrv extends ServerTpl {
                     session.updateTime = new Date()
                     sData = session.data ? JSON.parseObject(session.data) : new JSONObject()
                 }
-                hCtx.regFinishedFn { session.data = sData.toString(); repo.saveOrUpdate(session) }
+                hCtx.regFinishedFn {
+                    session.data = JSON.toJSONString(sData.findAll {e -> e.value !instanceof Supplier})
+                    repo.saveOrUpdate(session)
+                }
             }
         }
         sessionId = session && session.valid ? session.sessionId : UUID.randomUUID().toString().replace('-', '')

@@ -1,7 +1,5 @@
 <template>
-    <div>
-        <div ref="main" v-bind:style="{height: heightPx, width: widthPx}"></div>
-    </div>
+  <div ref="main" v-bind:style="{height: heightPx, width: widthPx}"></div>
 </template>
 <script>
     let timeUpdatedStatus = {

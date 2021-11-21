@@ -8,6 +8,8 @@ import cn.xnatural.jpa.Repo
 import entity.User
 import service.FileUploader
 
+import java.util.function.Supplier
+
 @Ctrl
 class MainCtrl extends ServerTpl {
 
@@ -28,34 +30,22 @@ class MainCtrl extends ServerTpl {
             (hCtx.pieces?[0] == 'mnt' && !(hCtx.pieces?[1] == 'login')) ||
             auth_page.keySet().find {hCtx.request.path.endsWith(it)}
         ) {
-            def res = getCurrentUser(hCtx)
-            if (res.code != '00') { // 判断当前session 是否过期
-                hCtx.render(res)
+            def uId = hCtx.getSessionAttr('uId')
+            if (uId) {
+                // 设置用户权限绑定到请求
+                hCtx.setAttr('permissions', {
+                    def pIds = cacheSrv?.get("permission_" + uId)
+                    if (pIds == null) {
+                        def permissions = repo.findById(User, Utils.to(uId, Long)).permissions
+                        pIds = permissions?.split(',')?.toList()?.toSet()?:Collections.emptySet()
+                        cacheSrv?.set("permission_" + uId, pIds)
+                    }
+                    return pIds
+                } as Supplier)
+            } else {
+                hCtx.response.status(401)
+                hCtx.render(ApiResp.fail('用户会话已失效, 请重新登录'))
             }
-        }
-    }
-
-
-    /**
-     * 获取当前 会话 中的用户信息
-     */
-    @Path(path = 'getCurrentUser')
-    ApiResp getCurrentUser(HttpContext hCtx) {
-        def uId = hCtx.getSessionAttr('uId')
-        if (uId) {
-            def pIds = cacheSrv?.get("permission_" + uId)
-            if (pIds == null) {
-                def permissions = repo.findById(User, Utils.to(uId, Long)).permissions
-                pIds = permissions?.split(',')?.toList()?.toSet()?:Collections.emptySet()
-                cacheSrv?.set("permission_" + uId, pIds)
-            }
-            hCtx.setAttr('permissions', pIds)
-            return ApiResp.ok().attr('id', uId)
-                    .attr('name', hCtx.getSessionAttr('uName'))
-                    .attr('permissionIds', pIds)
-        } else {
-            hCtx.response.status(401)
-            return ApiResp.fail('用户会话已失效, 请重新登录')
         }
     }
 
@@ -83,7 +73,7 @@ class MainCtrl extends ServerTpl {
     @Path(path = 'health')
     ApiResp health() {
         ApiResp.ok(
-            ['status': app().sysLoad <= 5 ? 'GREEN' : (app().sysLoad < 8 ? 'YELLOW' : 'RED'), 'detail':
+            ['status': 'GREEN', 'detail':
                 [
                     'db': ['status': 'UP'],
                 ],
@@ -126,7 +116,7 @@ class MainCtrl extends ServerTpl {
         }
         Utils.baseDir("static/js/$fName")
     }
-    @Path(path = 'js/lib/:fName')
+    @Path(path = 'js/lib/{fName}')
     File js_lib(String fName, HttpContext hCtx) {
         hCtx.response.cacheControl(86400) // 一天
         Utils.baseDir("static/js/lib/$fName")

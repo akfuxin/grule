@@ -43,8 +43,8 @@ class MntCtrl extends ServerTpl {
 
     /**
      * 登录
-     * @param username
-     * @param password
+     * @param username 用户名
+     * @param password 密码
      */
     @Path(path = 'login')
     ApiResp login(String username, String password, HttpContext hCtx) {
@@ -66,6 +66,17 @@ class MntCtrl extends ServerTpl {
         repo.saveOrUpdate(user)
         repo.saveOrUpdate(new UserSession(valid: true, sessionId: hCtx.sessionId, userId: user.id, data: JSON.toJSONString([uId: user.id, uName: user.name, uGroup: user.group])))
         ApiResp.ok().attr('id', user.id).attr('name', username).attr('permissionIds', pIds)
+    }
+
+
+    /**
+     * 获取当前 会话 中的用户信息
+     */
+    @Path(path = 'currentUser', method = 'get')
+    ApiResp currentUser(HttpContext hCtx) {
+        return ApiResp.ok().attr('id', hCtx.getSessionAttr('uId'))
+                .attr('name', hCtx.getSessionAttr('uName'))
+                .attr('permissionIds', hCtx.getAttr('permissions', Set))
     }
 
 

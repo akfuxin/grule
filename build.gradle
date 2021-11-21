@@ -46,8 +46,7 @@ dependencies {
     //implementation 'com.alibaba:fastjson:1.2.73'
 
     implementation 'cn.xnatural:tiny:1.0.10'
-    implementation 'cn.xnatural:http:1.0.10'
-    implementation 'cn.xnatural.jpa:jpa:1.0.6'
+    implementation 'cn.xnatural:http:1.0.12'
     implementation 'cn.xnatural:jpa:1.0.8'
     implementation 'cn.xnatural.sched:sched:1.0.2'
     implementation 'cn.xnatural.remoter:remoter:1.0.4'
